@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Vanguard Admin • Biometric Telemetry & Frame Gallery</title>
+<style>
+  *{box-sizing:border-box}
+  :root{
+    --bg:#090d16;
+    --card-bg:#111625;
+    --card-border:#1f283d;
+    --accent:#3b82f6;
+    --accent-glow:rgba(59,130,246,0.35);
+    --green:#10b981;
+    --text-primary:#f1f5f9;
+    --text-muted:#8b949e;
+  }
+  body{margin:0;background:var(--bg);color:var(--text-primary);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:16px;line-height:1.4}
+  .container{max-width:1200px;margin:0 auto}
+
+  /* Header */
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:1px solid var(--card-border);padding-bottom:16px;flex-wrap:wrap;gap:12px}
+  .title-group h1{margin:0;font-size:19px;font-weight:700;display:flex;align-items:center;gap:10px;color:#60a5fa}
+  .title-group p{margin:4px 0 0;font-size:12px;color:var(--text-muted)}
+  .header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{background:#238636;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;touch-action:manipulation}
+  .btn:hover{background:#2ea043}
+  .btn-outline{background:#161b22;border:1px solid #30363d;color:#c9d1d9}
+  .btn-outline:hover{background:#21262d}
+  .btn-blue{background:#1f6feb}
+  .btn-blue:hover{background:#388bfd}
+
+  /* Metric Cards */
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+  .card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:16px}
+  .card-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:.5px}
+  .card-value{font-size:26px;font-weight:800;margin-top:4px;color:#fff}
+  .card-sub{font-size:11px;color:#7ee787;margin-top:4px}
+
+  /* Main Container */
+  .table-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;overflow:hidden}
+  .table-header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--card-border);flex-wrap:wrap;gap:8px}
+  .table-header h2{margin:0;font-size:14px;font-weight:600}
+  .search-input{background:#0d1117;border:1px solid #30363d;color:#fff;border-radius:6px;padding:6px 12px;font-size:12px;outline:none;width:180px}
+  .search-input:focus{border-color:var(--accent)}
+
+  /* Desktop Table */
+  .table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;font-size:12px;text-align:left;min-width:650px}
+  th{background:#0d1117;color:var(--text-muted);padding:10px 14px;font-weight:600;border-bottom:1px solid var(--card-border)}
+  td{padding:12px 14px;border-bottom:1px solid var(--card-border);vertical-align:middle}
+  tr:hover td{background:rgba(255,255,255,.02)}
+
+  .ip-badge{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#161b22;border:1px solid #30363d;padding:2px 6px;border-radius:4px;font-size:12px;color:#58a6ff;font-weight:600}
+  .loc-badge{display:inline-block;font-size:11px;color:var(--text-muted);margin-top:3px}
+  .status-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:16px;font-size:11px;font-weight:600}
+  .status-passed{background:rgba(46,160,67,.15);color:#3fb950;border:1px solid rgba(46,160,67,.4)}
+  .status-pending{background:rgba(210,153,34,.15);color:#d29922;border:1px solid rgba(210,153,34,.4)}
+
+  .view-btn{background:#1f6feb;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:5px;touch-action:manipulation}
+  .view-btn:hover{background:#388bfd}
+  .view-btn:disabled{opacity:.35;cursor:not-allowed}
+
+  /* Mobile Card View (shown on screens < 768px) */
+  .mobile-cards{display:none;padding:12px;gap:12px;flex-direction:column}
+  .m-card{background:#0d1117;border:1px solid #30363d;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .m-card-top{display:flex;justify-content:space-between;align-items:flex-start}
+  .m-card-loc{font-size:12px;color:#c9d1d9;margin-top:4px;display:flex;align-items:center;gap:5px}
+  .m-card-meta{font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #21262d;border-bottom:1px dashed #21262d}
+  .m-card-pills{display:flex;gap:6px}
+  .m-card-btn{width:100%;padding:10px;font-size:12px;font-weight:600;justify-content:center}
+
+  @media (max-width: 768px){
+    body{padding:12px}
+    .table-wrapper{display:none}
+    .mobile-cards{display:flex}
+    .metrics{grid-template-columns:1fr 1fr}
+    header{margin-bottom:14px}
+    .title-group h1{font-size:17px}
+  }
+
+  /* Gallery Modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:100;backdrop-filter:blur(6px);padding:10px}
+  .modal-overlay.open{display:grid}
+  .gallery-modal{background:#161b22;border:1px solid #30363d;border-radius:12px;width:min(96vw,880px);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.9)}
+  
+  .gallery-head{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #21262d;background:#0d1117}
+  .gallery-head-info h3{margin:0;font-size:15px;color:#f0f6fc;display:flex;align-items:center;gap:8px}
+  .gallery-head-info p{margin:3px 0 0;font-size:11px;color:var(--text-muted)}
+  .gallery-close{background:none;border:none;color:#8b949e;cursor:pointer;font-size:24px;padding:4px 8px;touch-action:manipulation}
+  .gallery-close:hover{color:#fff}
+
+  /* Player Controls */
+  .player-toolbar{background:#111625;border-bottom:1px solid #21262d;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .filter-group{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .filter-chip{background:#1c2333;border:1px solid #28334a;border-radius:14px;padding:4px 10px;font-size:11px;color:#cbd5e1;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+  .filter-chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .player-btn{background:#238636;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;touch-action:manipulation}
+  .player-btn.playing{background:#da3633}
+
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;padding:14px;overflow-y:auto;max-height:calc(90vh - 140px);-webkit-overflow-scrolling:touch}
+  @media (max-width: 480px){
+    .gallery-grid{grid-template-columns:repeat(3,1fr);gap:6px;padding:10px}
+  }
+
+  .gallery-item{background:#0d1117;border:1px solid #30363d;border-radius:8px;overflow:hidden;text-align:center;cursor:pointer;transition:transform .15s,border-color .15s;position:relative}
+  .gallery-item:hover{transform:translateY(-2px);border-color:#58a6ff}
+  .gallery-item.playing-frame{border-color:#3fb950;box-shadow:0 0 10px rgba(63,185,80,.6)}
+  .gallery-item img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#05080f}
+  .gallery-tag{font-size:10px;padding:3px;color:#8b949e;font-weight:700;text-transform:uppercase;background:#0d1117;display:flex;justify-content:space-between;padding:3px 6px}
+  .tag-label{color:#60a5fa}
+
+  /* Lightbox Preview */
+  .lightbox-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:150;padding:16px}
+  .lightbox-overlay.open{display:flex}
+  .lightbox-box{max-width:92vw;max-height:85vh;position:relative;display:flex;flex-direction:column;align-items:center}
+  .lightbox-box img{max-width:100%;max-height:72vh;border-radius:8px;border:1px solid #30363d;box-shadow:0 10px 40px rgba(0,0,0,.9);object-fit:contain}
+  .lightbox-nav{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:12px;color:#fff}
+  .lightbox-btn{background:#21262d;border:1px solid #30363d;color:#fff;border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600;touch-action:manipulation}
+  .lightbox-btn:hover{background:#30363d}
+  .lightbox-meta{font-size:12px;color:#8b949e;text-align:center}
+  .lightbox-close{position:absolute;top:-36px;right:0;background:none;border:none;color:#fff;font-size:28px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="title-group">
+      <h1>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+        Biometric Intelligence & Telemetry
+      </h1>
+      <p>Synchronized to Supabase Database & Cloudflare R2 Bucket &bull; 5 FPS Biometric Streams</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" id="refreshBtn">&#x21bb; Refresh</button>
+      <a href="/" class="btn btn-blue" target="_blank">&rarr; Open Challenge</a>
+    </div>
+  </header>
+
+  <!-- Metric Overview -->
+  <div class="metrics">
+    <div class="card">
+      <div class="card-label">Total Visitors</div>
+      <div class="card-value" id="mTotalVisitors">0</div>
+      <div class="card-sub">Recorded immediately</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Verified Humans</div>
+      <div class="card-value" id="mVerified">0</div>
+      <div class="card-sub">Passed 2-Stage Barrier</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Captured Frames</div>
+      <div class="card-value" id="mFrames">0</div>
+      <div class="card-sub">5 FPS Dataset for AI Training</div>
+    </div>
+  </div>
+
+  <!-- Visitors Container -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2>Visitor Logs & Captured Biometrics</h2>
+      <input type="text" id="filterInput" class="search-input" placeholder="Search IP, City, OS...">
+    </div>
+
+    <!-- Desktop Table View -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>IP Address & Location</th>
+            <th>Visit Timestamp</th>
+            <th>Device / Browser / OS</th>
+            <th>CAPTCHA</th>
+            <th>Face Liveness</th>
+            <th>Captured Frames</th>
+          </tr>
+        </thead>
+        <tbody id="visitorsList">
+          <tr><td colspan="6" style="text-align:center;color:#8b949e;padding:30px">Loading visitor records...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="mobile-cards" id="mobileCards">
+      <div style="text-align:center;color:#8b949e;padding:20px">Loading visitor records...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Gallery for Viewing Saved Face Frames -->
+<div class="modal-overlay" id="galleryOverlay">
+  <div class="gallery-modal">
+    <div class="gallery-head">
+      <div class="gallery-head-info">
+        <h3 id="galleryTitle">Captured Biometric Frames</h3>
+        <p id="gallerySubtitle">5 FPS face liveness stream</p>
+      </div>
+      <button class="gallery-close" id="closeGallery">&times;</button>
+    </div>
+
+    <!-- Player Toolbar -->
+    <div class="player-toolbar">
+      <div class="filter-group">
+        <button class="filter-chip active" data-filter="all">All (<span id="countAll">0</span>)</button>
+        <button class="filter-chip" data-filter="nod">Nod (<span id="countNod">0</span>)</button>
+        <button class="filter-chip" data-filter="turn">Turn (<span id="countTurn">0</span>)</button>
+        <button class="filter-chip" data-filter="blink">Blink (<span id="countBlink">0</span>)</button>
+        <button class="filter-chip" data-filter="align">Align (<span id="countAlign">0</span>)</button>
+      </div>
+      <button class="player-btn" id="playBtn">&#9654; Play 5 FPS Sequence</button>
+    </div>
+
+    <!-- Thumbnail Grid -->
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </div>
+</div>
+
+<!-- Fullscreen Lightbox Preview -->
+<div class="lightbox-overlay" id="lightboxOverlay">
+  <div class="lightbox-box">
+    <button class="lightbox-close" id="closeLightbox">&times;</button>
+    <img id="lightboxImg" src="" alt="Fullscreen Frame">
+    <div class="lightbox-nav">
+      <button class="lightbox-btn" id="prevFrame">&larr; Prev</button>
+      <div class="lightbox-meta" id="lightboxMeta">Frame 0 of 0</div>
+      <button class="lightbox-btn" id="nextFrame">Next &rarr;</button>
+    </div>
+    <div style="margin-top:10px">
+      <a id="r2Link" href="#" target="_blank" class="btn btn-outline" style="font-size:11px">&#x1F517; Open Cloudflare R2 URL</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let allVisitors = [];
+let currentFrames = [];
+let activeFilter = 'all';
+let currentLightboxIdx = 0;
+let playbackInterval = null;
+
+async function loadData() {
+  try {
+    const res = await (await fetch('/api/admin/visitors')).json();
+    $('mTotalVisitors').textContent = res.total_visitors || 0;
+    $('mVerified').textContent = res.verified_count || 0;
+    $('mFrames').textContent = res.total_frames || 0;
+
+    allVisitors = res.visitors || [];
+    renderVisitors();
+  } catch (err) {
+    console.error('Error fetching admin data:', err);
+  }
+}
+
+function renderVisitors() {
+  const query = ($('filterInput').value || '').toLowerCase().trim();
+  const filtered = allVisitors.filter(v => {
+    if (!query) return true;
+    const txt = [v.ip_address, v.city, v.region, v.country, v.os, v.browser, v.isp].filter(Boolean).join(' ').toLowerCase();
+    return txt.includes(query);
+  });
+
+  // 1. Render Desktop Table
+  const tbody = $('visitorsList');
+  tbody.innerHTML = '';
+  // 2. Render Mobile Cards
+  const mContainer = $('mobileCards');
+  mContainer.innerHTML = '';
+
+  if (filtered.length === 0) {
+    const emptyMsg = '<tr><td colspan="6" style="text-align:center;color:#8b949e;padding:30px">No visitors match this query.</td></tr>';
+    tbody.innerHTML = emptyMsg;
+    mContainer.innerHTML = '<div style="text-align:center;color:#8b949e;padding:20px">No visitors recorded yet.</div>';
+    return;
+  }
+
+  filtered.forEach(v => {
+    const loc = [v.city, v.region, v.country].filter(Boolean).join(', ') || 'Local Network';
+    const isVerified = v.stage2_status === 'passed';
+
+    // Desktop Row
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <span class="ip-badge">${v.ip_address}</span><br>
+        <span class="loc-badge">&#127757; ${loc} ${v.isp ? ' &bull; ' + v.isp : ''}</span>
+      </td>
+      <td>${v.created_at || 'Just now'}</td>
+      <td>
+        <strong>${v.browser || 'Browser'} on ${v.os || 'OS'}</strong><br>
+        <span style="font-size:11px;color:#8b949e">${v.screen_res || ''} &bull; ${v.language || ''}</span>
+      </td>
+      <td>
+        <span class="status-pill ${v.stage1_status === 'passed' ? 'status-passed' : 'status-pending'}">
+          ${v.stage1_status === 'passed' ? '&#10003; Passed' : 'Pending'}
+        </span>
+      </td>
+      <td>
+        <span class="status-pill ${isVerified ? 'status-passed' : 'status-pending'}">
+          ${isVerified ? '&#10003; Verified' : 'Pending'}
+        </span>
+      </td>
+      <td>
+        <button class="view-btn" ${v.frame_count > 0 ? '' : 'disabled'} onclick='viewFrames(${JSON.stringify(v)})'>
+          &#128065; View ${v.frame_count || 0} Frames
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+
+    // Mobile Card
+    const card = document.createElement('div');
+    card.className = 'm-card';
+    card.innerHTML = `
+      <div class="m-card-top">
+        <div>
+          <span class="ip-badge">${v.ip_address}</span>
+          <div class="m-card-loc">&#127757; ${loc}</div>
+        </div>
+        <div class="m-card-pills">
+          <span class="status-pill ${isVerified ? 'status-passed' : 'status-pending'}">
+            ${isVerified ? '&#10003; Verified' : 'Pending'}
+          </span>
+        </div>
+      </div>
+      <div class="m-card-meta">
+        <span>${v.browser || 'Browser'} &bull; ${v.os || 'OS'}</span>
+        <span>${v.created_at || 'Recent'}</span>
+      </div>
+      <button class="view-btn m-card-btn" ${v.frame_count > 0 ? '' : 'disabled'} onclick='viewFrames(${JSON.stringify(v)})'>
+        &#128065; View ${v.frame_count || 0} Biometric Frames
+      </button>
+    `;
+    mContainer.appendChild(card);
+  });
+}
+
+$('filterInput').addEventListener('input', renderVisitors);
+
+async function viewFrames(visitor) {
+  stopPlayback();
+  $('galleryTitle').textContent = `${visitor.ip_address} • ${visitor.city || 'Visitor'}`;
+  $('gallerySubtitle').textContent = `Folder: ${visitor.folder_name} • Total: ${visitor.frame_count} frames (5 FPS)`;
+  const grid = $('galleryGrid');
+  grid.innerHTML = '<div style="color:#8b949e;padding:20px">Loading frames from storage...</div>';
+  $('galleryOverlay').classList.add('open');
+
+  try {
+    const res = await (await fetch(`/api/admin/session-frames?folder=${encodeURIComponent(visitor.folder_name)}`)).json();
+    currentFrames = res.frames || [];
+
+    // Update counts
+    $('countAll').textContent = currentFrames.length;
+    $('countNod').textContent = currentFrames.filter(f => f.label.includes('nod')).length;
+    $('countTurn').textContent = currentFrames.filter(f => f.label.includes('turn')).length;
+    $('countBlink').textContent = currentFrames.filter(f => f.label.includes('blink')).length;
+    $('countAlign').textContent = currentFrames.filter(f => f.label.includes('align')).length;
+
+    renderGalleryGrid();
+  } catch (e) {
+    grid.innerHTML = '<div style="color:#ff7b72;padding:20px">Failed to load frames for this session.</div>';
+  }
+}
+
+function getFilteredFrames() {
+  if (activeFilter === 'all') return currentFrames;
+  return currentFrames.filter(f => f.label.toLowerCase().includes(activeFilter));
+}
+
+function renderGalleryGrid() {
+  const grid = $('galleryGrid');
+  grid.innerHTML = '';
+  const list = getFilteredFrames();
+
+  if (list.length === 0) {
+    grid.innerHTML = '<div style="color:#8b949e;padding:20px">No frames match this category.</div>';
+    return;
+  }
+
+  list.forEach((f, idx) => {
+    const item = document.createElement('div');
+    item.className = 'gallery-item';
+    item.id = `frame-item-${f.index}`;
+    item.innerHTML = `
+      <img src="${f.url}" alt="${f.label}" loading="lazy" onerror="this.src='${f.r2_url || ''}'">
+      <div class="gallery-tag">
+        <span class="tag-label">${f.label}</span>
+        <span>#${f.index}</span>
+      </div>
+    `;
+    item.onclick = () => openLightbox(idx);
+    grid.appendChild(item);
+  });
+}
+
+// Filter chips
+document.querySelectorAll('.filter-chip').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderGalleryGrid();
+  };
+});
+
+// Interactive 5 FPS Playback Loop
+function stopPlayback() {
+  if (playbackInterval) {
+    clearInterval(playbackInterval);
+    playbackInterval = null;
+    $('playBtn').innerHTML = '&#9654; Play 5 FPS Sequence';
+    $('playBtn').classList.remove('playing');
+  }
+}
+
+$('playBtn').onclick = () => {
+  if (playbackInterval) {
+    stopPlayback();
+  } else {
+    const list = getFilteredFrames();
+    if (list.length === 0) return;
+    $('playBtn').innerHTML = '&#9632; Stop Player';
+    $('playBtn').classList.add('playing');
+    let pIdx = 0;
+    playbackInterval = setInterval(() => {
+      // Unhighlight previous
+      document.querySelectorAll('.gallery-item').forEach(el => el.classList.remove('playing-frame'));
+      const f = list[pIdx];
+      const el = document.getElementById(`frame-item-${f.index}`);
+      if (el) {
+        el.classList.add('playing-frame');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      pIdx = (pIdx + 1) % list.length;
+    }, 200); // 5 FPS = 200ms
+  }
+};
+
+// Fullscreen Lightbox
+function openLightbox(idx) {
+  const list = getFilteredFrames();
+  if (!list[idx]) return;
+  currentLightboxIdx = idx;
+  const f = list[idx];
+  $('lightboxImg').src = f.url;
+  $('lightboxMeta').innerHTML = `<strong>${f.label.toUpperCase()} #${f.index}</strong> &bull; (${idx + 1} of ${list.length})`;
+  if (f.r2_url) {
+    $('r2Link').href = f.r2_url;
+    $('r2Link').style.display = 'inline-flex';
+  } else {
+    $('r2Link').style.display = 'none';
+  }
+  $('lightboxOverlay').classList.add('open');
+}
+
+$('prevFrame').onclick = () => {
+  const list = getFilteredFrames();
+  if (currentLightboxIdx > 0) openLightbox(currentLightboxIdx - 1);
+};
+
+$('nextFrame').onclick = () => {
+  const list = getFilteredFrames();
+  if (currentLightboxIdx < list.length - 1) openLightbox(currentLightboxIdx + 1);
+};
+
+$('closeLightbox').onclick = () => $('lightboxOverlay').classList.remove('open');
+$('closeGallery').onclick = () => {
+  stopPlayback();
+  $('galleryOverlay').classList.remove('open');
+};
+
+$('refreshBtn').onclick = loadData;
+
+loadData();
+setInterval(loadData, 8000);
+</script>
+</body>
+</html>
