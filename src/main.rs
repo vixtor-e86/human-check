@@ -532,11 +532,10 @@ async fn submit_statement(
             );
         }
 
+        // Sync to Supabase matching the exact table schema (session_id, email)
         cloud::spawn_supabase_sync(serde_json::json!({
             "session_id": sid,
-            "email": email,
-            "statement_start": start_d,
-            "statement_end": end_d
+            "email": email
         }));
     }
 
@@ -818,18 +817,18 @@ struct VisitorRow {
     session_id: String,
     ip_address: String,
     created_at: String,
-    browser: String,
-    os: String,
-    device: String,
-    language: String,
-    screen_res: String,
+    browser: Option<String>,
+    os: Option<String>,
+    device: Option<String>,
+    language: Option<String>,
+    screen_res: Option<String>,
     country: Option<String>,
     region: Option<String>,
     city: Option<String>,
     isp: Option<String>,
-    folder_name: String,
-    stage1_status: String,
-    stage2_status: String,
+    folder_name: Option<String>,
+    stage1_status: Option<String>,
+    stage2_status: Option<String>,
     frame_count: i64,
     email: Option<String>,
 }

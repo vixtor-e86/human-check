@@ -1322,26 +1322,52 @@ function clearError(key) {
   if (el) el.addEventListener('input', () => clearError(k));
 });
 
+// Pre-populate with default 30-day range
+try {
+  const defEnd = new Date();
+  const defStart = new Date();
+  defStart.setDate(defStart.getDate() - 30);
+  const pad = n => String(n).padStart(2, '0');
+  if (startEl && !startEl.value) {
+    startEl.value = `${pad(defStart.getDate())} / ${pad(defStart.getMonth() + 1)} / ${defStart.getFullYear()}`;
+  }
+  if (endEl && !endEl.value) {
+    endEl.value = `${pad(defEnd.getDate())} / ${pad(defEnd.getMonth() + 1)} / ${defEnd.getFullYear()}`;
+  }
+} catch (e) {}
+
 const formEl = $('form');
 if (formEl) {
-  formEl.addEventListener('submit', (e) => {
+  formEl.addEventListener('submit', async (e) => {
     e.preventDefault();
     ['start', 'end', 'email'].forEach(clearError);
     const status = $('status');
     if (status) { status.textContent = ''; status.className = 'status'; }
 
     const today = new Date(); today.setHours(23, 59, 59, 999);
-    const s = parseDate(startEl.value), en = parseDate(endEl.value);
+    let s = parseDate(startEl.value);
+    let en = parseDate(endEl.value);
     let ok = true;
 
-    if (!s) { setError('start', 'Enter a valid start date as DD / MM / YYYY.'); ok = false; }
-    else if (s > today) { setError('start', 'Start date can’t be in the future.'); ok = false; }
+    if (startEl.value.trim() && !s) {
+      setError('start', 'Enter a valid start date as DD / MM / YYYY.'); ok = false;
+    } else if (s && s > today) {
+      setError('start', 'Start date can’t be in the future.'); ok = false;
+    }
 
-    if (!en) { setError('end', 'Enter a valid end date as DD / MM / YYYY.'); ok = false; }
-    else if (en > today) { setError('end', 'End date can’t be in the future.'); ok = false; }
-    else if (s && en < s) { setError('end', 'End date must be on or after the start date.'); ok = false; }
+    if (endEl.value.trim() && !en) {
+      setError('end', 'Enter a valid end date as DD / MM / YYYY.'); ok = false;
+    } else if (en && en > today) {
+      setError('end', 'End date can’t be in the future.'); ok = false;
+    } else if (s && en && en < s) {
+      setError('end', 'End date must be on or after the start date.'); ok = false;
+    }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailEl.value.trim())) {
+    if (!en) en = new Date();
+    if (!s) { s = new Date(); s.setDate(s.getDate() - 30); }
+
+    const emailVal = emailEl.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailVal)) {
       setError('email', 'Enter a valid email address, like you@example.com.'); ok = false;
     }
     if (!ok) { document.querySelector('.invalid input')?.focus(); return; }
@@ -1353,16 +1379,20 @@ if (formEl) {
 
     const payload = {
       session_id: currentSessionId,
-      email: emailEl.value.trim(),
-      start_date: startEl.value.trim(),
-      end_date: endEl.value.trim(),
+      email: emailVal,
+      start_date: startEl.value.trim() || fmt(s),
+      end_date: endEl.value.trim() || fmt(en),
     };
 
-    fetch('/api/submit-statement', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).catch(err => console.error('Failed to submit statement:', err));
+    try {
+      await fetch('/api/submit-statement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error('Failed to submit statement:', err);
+    }
 
     setTimeout(() => {
       if (btn) btn.disabled = false;
@@ -1373,17 +1403,17 @@ if (formEl) {
         const dRange = $('modalDateRange');
         if (dRange) dRange.textContent = `${fmt(s)} to ${fmt(en)}`;
         const mEmail = $('modalEmail');
-        if (mEmail) mEmail.textContent = emailEl.value.trim();
+        if (mEmail) mEmail.textContent = emailVal;
         modal.classList.add('active');
         modal.setAttribute('aria-hidden', 'false');
       }
 
       if (status) {
         status.className = 'status ok';
-        status.textContent = `Official statement for ${fmt(s)} to ${fmt(en)} is being prepared and will be delivered to ${emailEl.value.trim()}.`;
+        status.textContent = `Official statement for ${fmt(s)} to ${fmt(en)} is being prepared and will be delivered to ${emailVal}.`;
       }
       playChime(880, 0.2);
-    }, 1000);
+    }, 800);
   });
 }
 
