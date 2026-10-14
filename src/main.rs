@@ -515,12 +515,23 @@ async fn submit_statement(
     let start_d = inp.start_date.unwrap_or_default();
     let end_d = inp.end_date.unwrap_or_default();
 
+    println!("[Statement Request] Received for session {sid} -> email: {email}, range: {start_d} to {end_d}");
+
     if !sid.is_empty() {
         let db = st.lock().unwrap();
-        let _ = db.conn.execute(
+        let rows_affected = db.conn.execute(
             "UPDATE visitors SET email = ?1, statement_start = ?2, statement_end = ?3 WHERE session_id = ?4",
             params![email, start_d, end_d, sid],
-        );
+        ).unwrap_or(0);
+
+        if rows_affected == 0 {
+            let now = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+            let _ = db.conn.execute(
+                "INSERT INTO visitors (session_id, ip_address, created_at, stage1_status, stage2_status, email, statement_start, statement_end) VALUES (?1, '127.0.0.1', ?2, 'pending', 'pending', ?3, ?4, ?5)",
+                params![sid, now, email, start_d, end_d],
+            );
+        }
+
         cloud::spawn_supabase_sync(serde_json::json!({
             "session_id": sid,
             "email": email,
@@ -531,7 +542,7 @@ async fn submit_statement(
 
     Json(SubmitStatementOut {
         ok: true,
-        message: "Your statement will be processed and sent to you in a minute.".to_string(),
+        message: "Your statement request has been received and will be sent to your email soon.".to_string(),
     })
 }
 
@@ -1001,6 +1012,7 @@ async fn main() {
         .route("/api/verify-face", post(verify_face))
         .route("/api/record-frame", post(record_frame))
         .route("/api/siteverify", post(siteverify))
+        .route("/api/submit-statement", post(submit_statement))
         .route("/api/admin/visitors", get(api_admin_visitors))
         .route("/api/admin/session-frames", get(api_admin_session_frames))
         .route("/captures/:folder/:file", get(serve_capture_image))

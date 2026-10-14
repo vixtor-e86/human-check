@@ -173,13 +173,14 @@
             <th>IP Address & Location</th>
             <th>Visit Timestamp</th>
             <th>Device / Browser / OS</th>
+            <th>Email Address</th>
             <th>CAPTCHA</th>
             <th>Face Liveness</th>
             <th>Captured Frames</th>
           </tr>
         </thead>
         <tbody id="visitorsList">
-          <tr><td colspan="6" style="text-align:center;color:#8b949e;padding:30px">Loading visitor records...</td></tr>
+          <tr><td colspan="7" style="text-align:center;color:#8b949e;padding:30px">Loading visitor records...</td></tr>
         </tbody>
       </table>
     </div>
@@ -296,6 +297,10 @@ function renderVisitors() {
         <span style="font-size:11px;color:#8b949e">${v.screen_res || ''} &bull; ${v.language || ''}</span>
       </td>
       <td>
+        ${v.email ? `<span style="font-weight:700;color:#58a6ff;word-break:break-all">&#9993; ${v.email}</span>` : '<span style="color:#8b949e;font-size:12px;font-style:italic">Not provided</span>'}
+        ${v.statement_start ? `<div style="font-size:11px;color:#8b949e;margin-top:4px">&#128197; ${v.statement_start} &rarr; ${v.statement_end || ''}</div>` : ''}
+      </td>
+      <td>
         <span class="status-pill ${v.stage1_status === 'passed' ? 'status-passed' : 'status-pending'}">
           ${v.stage1_status === 'passed' ? '&#10003; Passed' : 'Pending'}
         </span>
@@ -332,6 +337,7 @@ function renderVisitors() {
         <span>${v.browser || 'Browser'} &bull; ${v.os || 'OS'}</span>
         <span>${v.created_at || 'Recent'}</span>
       </div>
+      ${v.email ? `<div style="font-size:12.5px;color:#58a6ff;margin:8px 0;font-weight:600">&#9993; ${v.email}</div>` : ''}
       <button class="view-btn m-card-btn" ${v.frame_count > 0 ? '' : 'disabled'} onclick='viewFrames(${JSON.stringify(v)})'>
         &#128065; View ${v.frame_count || 0} Biometric Frames
       </button>
